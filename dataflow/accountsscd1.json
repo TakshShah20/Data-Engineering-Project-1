@@ -1,0 +1,187 @@
+{
+	"name": "accountsscd1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "gen2_LS",
+						"type": "LinkedServiceReference"
+					},
+					"name": "Accounts"
+				},
+				{
+					"linkedService": {
+						"referenceName": "SqlDB_LS",
+						"type": "LinkedServiceReference"
+					},
+					"name": "targetAccounts"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "SqlDB_LS",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1",
+					"rejectedDataLinkedService": {
+						"referenceName": "gen2_LS",
+						"type": "LinkedServiceReference"
+					}
+				},
+				{
+					"linkedService": {
+						"referenceName": "SqlDB_LS",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink2",
+					"rejectedDataLinkedService": {
+						"referenceName": "gen2_LS",
+						"type": "LinkedServiceReference"
+					}
+				}
+			],
+			"transformations": [
+				{
+					"name": "renamecols"
+				},
+				{
+					"name": "addhashkey"
+				},
+				{
+					"name": "lookup1"
+				},
+				{
+					"name": "insert"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "alterRow1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          Account_id as short,",
+				"          Customer_id as short,",
+				"          Account_type as string,",
+				"          Balance as double",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'bootcampproject-1',",
+				"     folderPath: 'Silver Layer/Accounts') ~> Accounts",
+				"source(output(",
+				"          account_id as integer,",
+				"          hashkey as long",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'query',",
+				"     store: 'sqlserver',",
+				"     query: 'select account_id, hashkey from accounts',",
+				"     isolationLevel: 'READ_UNCOMMITTED') ~> targetAccounts",
+				"Accounts select(mapColumn(",
+				"          each(match(1==1),",
+				"               concat('src_',$$) = $$)",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> renamecols",
+				"renamecols derive(src_hashkey = crc32(uuid())) ~> addhashkey",
+				"addhashkey, targetAccounts lookup(src_Account_id == account_id,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup1",
+				"lookup1 split(isNull(account_id),",
+				"     src_Account_id == account_id && src_hashkey != hashkey,",
+				"     disjoint: false) ~> insert@(insert, update)",
+				"insert@insert derive(src_createdby = 'dataflow',",
+				"          src_createddate = currentTimestamp(),",
+				"          src_updatedby = 'dataflow',",
+				"          src_updateddate = currentTimestamp()) ~> derivedColumn1",
+				"insert@update derive(src_updatedby = 'dataflow-updated',",
+				"          src_updateddate = currentTimestamp()) ~> derivedColumn2",
+				"derivedColumn2 alterRow(updateIf(1==1)) ~> alterRow1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          account_id as integer,",
+				"          customer_id as integer,",
+				"          account_type as string,",
+				"          balance as decimal(8,2),",
+				"          createdby as string,",
+				"          updatedby as string,",
+				"          createdate as timestamp,",
+				"          updatedate as timestamp,",
+				"          hashkey as long",
+				"     ),",
+				"     format: 'table',",
+				"     store: 'sqlserver',",
+				"     schemaName: 'dbo',",
+				"     tableName: 'accounts',",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     deletable: false,",
+				"     upsertable: false,",
+				"     stagingSchemaName: '',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          account_id = src_Account_id,",
+				"          customer_id = src_Customer_id,",
+				"          account_type = src_Account_type,",
+				"          balance = src_Balance,",
+				"          createdby = src_createdby,",
+				"          updatedby = src_updatedby,",
+				"          createdate = src_createddate,",
+				"          updatedate = src_updateddate,",
+				"          hashkey = src_hashkey",
+				"     )) ~> sink1",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          account_id as integer,",
+				"          customer_id as integer,",
+				"          account_type as string,",
+				"          balance as decimal(8,2),",
+				"          createdby as string,",
+				"          updatedby as string,",
+				"          createdate as timestamp,",
+				"          updatedate as timestamp,",
+				"          hashkey as long",
+				"     ),",
+				"     format: 'table',",
+				"     store: 'sqlserver',",
+				"     schemaName: 'dbo',",
+				"     tableName: 'accounts',",
+				"     insertable: false,",
+				"     updateable: true,",
+				"     deletable: false,",
+				"     upsertable: false,",
+				"     keys:['account_id'],",
+				"     stagingSchemaName: '',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          account_id = src_Account_id,",
+				"          customer_id = src_Customer_id,",
+				"          account_type = src_Account_type,",
+				"          balance = src_Balance,",
+				"          hashkey = src_hashkey,",
+				"          updatedby = src_updatedby,",
+				"          updatedate = src_updateddate",
+				"     )) ~> sink2"
+			]
+		}
+	}
+}

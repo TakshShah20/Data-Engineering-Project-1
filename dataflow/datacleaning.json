@@ -1,0 +1,433 @@
+{
+	"name": "datacleaning",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "gen2_LS",
+						"type": "LinkedServiceReference"
+					},
+					"name": "accountsCSV"
+				},
+				{
+					"linkedService": {
+						"referenceName": "gen2_LS",
+						"type": "LinkedServiceReference"
+					},
+					"name": "customersCSV"
+				},
+				{
+					"linkedService": {
+						"referenceName": "gen2_LS",
+						"type": "LinkedServiceReference"
+					},
+					"name": "loanpaymentsCSV"
+				},
+				{
+					"linkedService": {
+						"referenceName": "gen2_LS",
+						"type": "LinkedServiceReference"
+					},
+					"name": "loansCSV"
+				},
+				{
+					"linkedService": {
+						"referenceName": "gen2_LS",
+						"type": "LinkedServiceReference"
+					},
+					"name": "transactionsCSV"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "gen2_LS",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1",
+					"rejectedDataLinkedService": {
+						"referenceName": "gen2_LS",
+						"type": "LinkedServiceReference"
+					}
+				},
+				{
+					"linkedService": {
+						"referenceName": "gen2_LS",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink2"
+				},
+				{
+					"linkedService": {
+						"referenceName": "gen2_LS",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink3",
+					"rejectedDataLinkedService": {
+						"referenceName": "gen2_LS",
+						"type": "LinkedServiceReference"
+					}
+				},
+				{
+					"linkedService": {
+						"referenceName": "gen2_LS",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink4"
+				},
+				{
+					"linkedService": {
+						"referenceName": "gen2_LS",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink5",
+					"rejectedDataLinkedService": {
+						"referenceName": "gen2_LS",
+						"type": "LinkedServiceReference"
+					}
+				}
+			],
+			"transformations": [
+				{
+					"name": "removenull1"
+				},
+				{
+					"name": "removeduplicates1"
+				},
+				{
+					"name": "removenull2"
+				},
+				{
+					"name": "removeduplicates2"
+				},
+				{
+					"name": "select2"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "removenull3"
+				},
+				{
+					"name": "removeduplicates3"
+				},
+				{
+					"name": "select3"
+				},
+				{
+					"name": "removenull4"
+				},
+				{
+					"name": "removeduplicates4"
+				},
+				{
+					"name": "select4"
+				},
+				{
+					"name": "removenull5"
+				},
+				{
+					"name": "removeduplicates5"
+				},
+				{
+					"name": "select5"
+				},
+				{
+					"name": "alterRow1"
+				},
+				{
+					"name": "alterRow2"
+				},
+				{
+					"name": "alterRow3"
+				},
+				{
+					"name": "alterRow4"
+				},
+				{
+					"name": "alterRow5"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          account_id as short,",
+				"          customer_id as short,",
+				"          account_type as string,",
+				"          balance as double",
+				"     ),",
+				"     useSchema: false,",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delimited',",
+				"     fileSystem: 'bootcampproject-1',",
+				"     folderPath: 'Bronze Layer',",
+				"     fileName: 'accounts.csv',",
+				"     columnDelimiter: ',',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '\\\"',",
+				"     columnNamesAsHeader: true) ~> accountsCSV",
+				"source(output(",
+				"          customer_id as short,",
+				"          first_name as string,",
+				"          last_name as string,",
+				"          address as string,",
+				"          city as string,",
+				"          state as string,",
+				"          zip as string",
+				"     ),",
+				"     useSchema: false,",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delimited',",
+				"     fileSystem: 'bootcampproject-1',",
+				"     folderPath: 'Bronze Layer',",
+				"     fileName: 'customers.csv',",
+				"     columnDelimiter: ',',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '\\\"',",
+				"     columnNamesAsHeader: true) ~> customersCSV",
+				"source(output(",
+				"          payment_id as short,",
+				"          loan_id as short,",
+				"          payment_date as date,",
+				"          payment_amount as short",
+				"     ),",
+				"     useSchema: false,",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delimited',",
+				"     fileSystem: 'bootcampproject-1',",
+				"     folderPath: 'Bronze Layer',",
+				"     fileName: 'loan_payments.csv',",
+				"     columnDelimiter: ',',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '\\\"',",
+				"     columnNamesAsHeader: true) ~> loanpaymentsCSV",
+				"source(output(",
+				"          loan_id as short,",
+				"          customer_id as short,",
+				"          loan_amount as double,",
+				"          interest_rate as double,",
+				"          loan_term as short",
+				"     ),",
+				"     useSchema: false,",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delimited',",
+				"     fileSystem: 'bootcampproject-1',",
+				"     folderPath: 'Bronze Layer',",
+				"     fileName: 'loans.csv',",
+				"     columnDelimiter: ',',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '\\\"',",
+				"     columnNamesAsHeader: true) ~> loansCSV",
+				"source(output(",
+				"          transaction_id as short,",
+				"          account_id as short,",
+				"          transaction_date as date,",
+				"          transaction_amount as double,",
+				"          transaction_type as string",
+				"     ),",
+				"     useSchema: false,",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delimited',",
+				"     fileSystem: 'bootcampproject-1',",
+				"     folderPath: 'Bronze Layer',",
+				"     fileName: 'transactions.csv',",
+				"     columnDelimiter: ',',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '\\\"',",
+				"     columnNamesAsHeader: true) ~> transactionsCSV",
+				"accountsCSV filter(!isNull(account_id) || !isNull(customer_id)) ~> removenull1",
+				"removenull1 aggregate(groupBy(account_id,",
+				"          customer_id,",
+				"          account_type,",
+				"          balance),",
+				"     rank = first(account_id)) ~> removeduplicates1",
+				"customersCSV filter(!isNull(customer_id) || !isNull(first_name)) ~> removenull2",
+				"removenull2 aggregate(groupBy(customer_id,",
+				"          first_name,",
+				"          last_name,",
+				"          address,",
+				"          city,",
+				"          state,",
+				"          zip),",
+				"     rank = count(customer_id)) ~> removeduplicates2",
+				"removeduplicates2 select(mapColumn(",
+				"          Customer_id = customer_id,",
+				"          First_name = first_name,",
+				"          Last_name = last_name,",
+				"          Address = address,",
+				"          City = city,",
+				"          State = state,",
+				"          Zip = zip",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"removeduplicates1 select(mapColumn(",
+				"          Account_id = account_id,",
+				"          Customer_id = customer_id,",
+				"          Account_type = account_type,",
+				"          Balance = balance",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"loanpaymentsCSV filter(!isNull(payment_id) || !isNull(loan_id)) ~> removenull3",
+				"removenull3 aggregate(groupBy(payment_id,",
+				"          loan_id,",
+				"          payment_date,",
+				"          payment_amount),",
+				"     rank = first(payment_id)) ~> removeduplicates3",
+				"removeduplicates3 select(mapColumn(",
+				"          Payment_id = payment_id,",
+				"          Loan_id = loan_id,",
+				"          Payment_date = payment_date,",
+				"          Payment_amount = payment_amount",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select3",
+				"loansCSV filter(!isNull(loan_id) || !isNull(customer_id)) ~> removenull4",
+				"removenull4 aggregate(groupBy(loan_id,",
+				"          customer_id,",
+				"          loan_amount,",
+				"          interest_rate,",
+				"          loan_term),",
+				"     rank = first(loan_id)) ~> removeduplicates4",
+				"removeduplicates4 select(mapColumn(",
+				"          Loan_id = loan_id,",
+				"          Customer_id = customer_id,",
+				"          Loan_amount = loan_amount,",
+				"          Interest_rate = interest_rate,",
+				"          Loan_term = loan_term",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select4",
+				"transactionsCSV filter(!isNull(transaction_id) || !isNull(account_id)) ~> removenull5",
+				"removenull5 aggregate(groupBy(transaction_id,",
+				"          account_id,",
+				"          transaction_type,",
+				"          transaction_date,",
+				"          transaction_amount),",
+				"     rank = first(transaction_id)) ~> removeduplicates5",
+				"removeduplicates5 select(mapColumn(",
+				"          Transaction_id = transaction_id,",
+				"          Account_id = account_id,",
+				"          Transaction_type = transaction_type,",
+				"          Transaction_date = transaction_date,",
+				"          Transaction_amount = transaction_amount",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select5",
+				"select1 alterRow(upsertIf(1==1)) ~> alterRow1",
+				"select2 alterRow(upsertIf(1==1)) ~> alterRow2",
+				"select3 alterRow(upsertIf(1==1)) ~> alterRow3",
+				"select4 alterRow(upsertIf(1==1)) ~> alterRow4",
+				"select5 alterRow(upsertIf(1==1)) ~> alterRow5",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'bootcampproject-1',",
+				"     folderPath: 'Silver Layer/Accounts',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['Account_id'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1",
+				"alterRow2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'bootcampproject-1',",
+				"     folderPath: 'Silver Layer/Customers',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['Customer_id'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink2",
+				"alterRow3 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'bootcampproject-1',",
+				"     folderPath: 'Silver Layer/LoanPayments',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['Payment_id'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink3",
+				"alterRow4 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'bootcampproject-1',",
+				"     folderPath: 'Silver Layer/Loans',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['Loan_id'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink4",
+				"alterRow5 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'bootcampproject-1',",
+				"     folderPath: 'Silver Layer/Transactions',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['Transaction_id'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink5"
+			]
+		}
+	}
+}

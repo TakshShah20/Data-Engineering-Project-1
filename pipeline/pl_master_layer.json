@@ -1,0 +1,75 @@
+{
+	"name": "pl_master_layer",
+	"properties": {
+		"activities": [
+			{
+				"name": "bronze",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_bronze_layer",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "silver",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "bronze",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_silver_layer",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "gold",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "silver",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_gold_layer",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "bootcampproject-1"
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-04-21T17:59:03Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

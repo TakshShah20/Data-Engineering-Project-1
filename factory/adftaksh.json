@@ -1,0 +1,9 @@
+{
+	"name": "adftaksh",
+	"location": "canadacentral",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "9c431bbb-72ee-46e0-a6ff-97446a6089bc",
+		"tenantId": "d4010fcd-283e-4032-baa5-87a3f1b4cc33"
+	}
+}

@@ -1,0 +1,202 @@
+{
+	"name": "transactionsscd2",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "gen2_LS",
+						"type": "LinkedServiceReference"
+					},
+					"name": "transactions"
+				},
+				{
+					"linkedService": {
+						"referenceName": "SqlDB_LS",
+						"type": "LinkedServiceReference"
+					},
+					"name": "targetTransactions"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "SqlDB_LS",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1",
+					"rejectedDataLinkedService": {
+						"referenceName": "gen2_LS",
+						"type": "LinkedServiceReference"
+					}
+				},
+				{
+					"linkedService": {
+						"referenceName": "SqlDB_LS",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink2",
+					"rejectedDataLinkedService": {
+						"referenceName": "gen2_LS",
+						"type": "LinkedServiceReference"
+					}
+				}
+			],
+			"transformations": [
+				{
+					"name": "renamecols"
+				},
+				{
+					"name": "addhashkey"
+				},
+				{
+					"name": "lookup1"
+				},
+				{
+					"name": "split1"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "alterRow1"
+				},
+				{
+					"name": "union1"
+				},
+				{
+					"name": "derivedColumn2"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          Transaction_id as short,",
+				"          Account_id as short,",
+				"          Transaction_type as string,",
+				"          Transaction_date as date,",
+				"          Transaction_amount as double",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'bootcampproject-1',",
+				"     folderPath: 'Silver Layer/Transactions') ~> transactions",
+				"source(output(",
+				"          transaction_id as integer,",
+				"          hashkey as long",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'query',",
+				"     store: 'sqlserver',",
+				"     query: 'select transaction_id, hashkey from transactions where isactive=1',",
+				"     isolationLevel: 'READ_UNCOMMITTED') ~> targetTransactions",
+				"transactions select(mapColumn(",
+				"          each(match(1==1),",
+				"               concat('src_',$$) = $$)",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> renamecols",
+				"renamecols derive(src_hashkey = crc32(uuid())) ~> addhashkey",
+				"addhashkey, targetTransactions lookup(src_Transaction_id == transaction_id,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup1",
+				"lookup1 split(isNull(transaction_id),",
+				"     src_Transaction_id == transaction_id && src_hashkey != hashkey,",
+				"     disjoint: false) ~> split1@(input, update)",
+				"split1@update derive(src_updatedby = 'dataflow-updated',",
+				"          src_updateddate = currentTimestamp(),",
+				"          src_isactive = 0) ~> derivedColumn1",
+				"derivedColumn1 alterRow(updateIf(1==1)) ~> alterRow1",
+				"split1@input, split1@update union(byName: true)~> union1",
+				"union1 derive(src_createdby = 'dataflow',",
+				"          src_createddate = currentTimestamp(),",
+				"          src_updatedby = 'dataflow',",
+				"          src_updateddate = currentTimestamp(),",
+				"          src_isactive = 1) ~> derivedColumn2",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          transaction_id as integer,",
+				"          account_id as integer,",
+				"          transaction_date as date,",
+				"          transaction_amount as decimal(8,2),",
+				"          transaction_type as string,",
+				"          createdby as string,",
+				"          createddate as timestamp,",
+				"          updatedby as string,",
+				"          updateddate as timestamp,",
+				"          hashkey as long,",
+				"          isactive as integer",
+				"     ),",
+				"     format: 'table',",
+				"     store: 'sqlserver',",
+				"     schemaName: 'dbo',",
+				"     tableName: 'transactions',",
+				"     insertable: false,",
+				"     updateable: false,",
+				"     deletable: false,",
+				"     upsertable: true,",
+				"     keys:['transaction_id','hashkey'],",
+				"     stagingSchemaName: '',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          transaction_id,",
+				"          account_id = src_Account_id,",
+				"          transaction_date = src_Transaction_date,",
+				"          transaction_amount = src_Transaction_amount,",
+				"          transaction_type = src_Transaction_type,",
+				"          updatedby = src_updatedby,",
+				"          updateddate = src_updateddate,",
+				"          hashkey,",
+				"          isactive = src_isactive",
+				"     )) ~> sink1",
+				"derivedColumn2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          transaction_id as integer,",
+				"          account_id as integer,",
+				"          transaction_date as date,",
+				"          transaction_amount as decimal(8,2),",
+				"          transaction_type as string,",
+				"          createdby as string,",
+				"          createddate as timestamp,",
+				"          updatedby as string,",
+				"          updateddate as timestamp,",
+				"          hashkey as long,",
+				"          isactive as integer",
+				"     ),",
+				"     format: 'table',",
+				"     store: 'sqlserver',",
+				"     schemaName: 'dbo',",
+				"     tableName: 'transactions',",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     deletable: false,",
+				"     upsertable: false,",
+				"     stagingSchemaName: '',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          transaction_id = src_Transaction_id,",
+				"          account_id = src_Account_id,",
+				"          transaction_date = src_Transaction_date,",
+				"          transaction_amount = src_Transaction_amount,",
+				"          transaction_type = src_Transaction_type,",
+				"          createdby = src_createdby,",
+				"          createddate = src_createddate,",
+				"          updatedby = src_updatedby,",
+				"          updateddate = src_updateddate,",
+				"          hashkey = src_hashkey,",
+				"          isactive = src_isactive",
+				"     )) ~> sink2"
+			]
+		}
+	}
+}

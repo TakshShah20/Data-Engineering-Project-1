@@ -1,0 +1,202 @@
+{
+	"name": "customersscd1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"linkedService": {
+						"referenceName": "gen2_LS",
+						"type": "LinkedServiceReference"
+					},
+					"name": "Customers"
+				},
+				{
+					"linkedService": {
+						"referenceName": "SqlDB_LS",
+						"type": "LinkedServiceReference"
+					},
+					"name": "targetCustomers"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "SqlDB_LS",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1",
+					"rejectedDataLinkedService": {
+						"referenceName": "gen2_LS",
+						"type": "LinkedServiceReference"
+					}
+				},
+				{
+					"linkedService": {
+						"referenceName": "SqlDB_LS",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink2",
+					"rejectedDataLinkedService": {
+						"referenceName": "gen2_LS",
+						"type": "LinkedServiceReference"
+					}
+				}
+			],
+			"transformations": [
+				{
+					"name": "renamecols"
+				},
+				{
+					"name": "addhashkey"
+				},
+				{
+					"name": "lookup1"
+				},
+				{
+					"name": "insert"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "alterRow1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          Customer_id as short,",
+				"          First_name as string,",
+				"          Last_name as string,",
+				"          Address as string,",
+				"          City as string,",
+				"          State as string,",
+				"          Zip as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'bootcampproject-1',",
+				"     folderPath: 'Silver Layer/Customers') ~> Customers",
+				"source(output(",
+				"          customer_id as integer,",
+				"          hashkey as long",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'query',",
+				"     store: 'sqlserver',",
+				"     query: 'select customer_id, hashkey from customers',",
+				"     isolationLevel: 'READ_UNCOMMITTED') ~> targetCustomers",
+				"Customers select(mapColumn(",
+				"          each(match(1==1),",
+				"               concat('src_',$$) = $$)",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> renamecols",
+				"renamecols derive(src_hashkey = crc32(uuid())) ~> addhashkey",
+				"addhashkey, targetCustomers lookup(src_Customer_id == customer_id,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup1",
+				"lookup1 split(isNull(customer_id),",
+				"     src_Customer_id == customer_id && src_hashkey != hashkey,",
+				"     disjoint: false) ~> insert@(insert, update)",
+				"insert@insert derive(src_createdby = 'dataflow',",
+				"          src_createddate = currentTimestamp(),",
+				"          src_updatedby = 'dataflow',",
+				"          src_updateddate = currentTimestamp()) ~> derivedColumn1",
+				"insert@update derive(src_updatedby = 'dataflow-updated',",
+				"          src_updateddate = currentTimestamp()) ~> derivedColumn2",
+				"derivedColumn2 alterRow(updateIf(1==1)) ~> alterRow1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          customer_id as integer,",
+				"          first_name as string,",
+				"          last_name as string,",
+				"          address as string,",
+				"          city as string,",
+				"          state as string,",
+				"          zip as string,",
+				"          createdby as string,",
+				"          updatedby as string,",
+				"          createdate as timestamp,",
+				"          updatedate as timestamp,",
+				"          hashkey as long",
+				"     ),",
+				"     format: 'table',",
+				"     store: 'sqlserver',",
+				"     schemaName: 'dbo',",
+				"     tableName: 'customers',",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     deletable: false,",
+				"     upsertable: false,",
+				"     stagingSchemaName: '',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          customer_id = src_Customer_id,",
+				"          first_name = src_First_name,",
+				"          last_name = src_Last_name,",
+				"          address = src_Address,",
+				"          city = src_City,",
+				"          state = src_State,",
+				"          zip = src_Zip,",
+				"          createdby = src_createdby,",
+				"          updatedby = src_updatedby,",
+				"          createdate = src_createddate,",
+				"          updatedate = src_updateddate,",
+				"          hashkey = src_hashkey",
+				"     )) ~> sink1",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          customer_id as integer,",
+				"          first_name as string,",
+				"          last_name as string,",
+				"          address as string,",
+				"          city as string,",
+				"          state as string,",
+				"          zip as string,",
+				"          createdby as string,",
+				"          updatedby as string,",
+				"          createdate as timestamp,",
+				"          updatedate as timestamp,",
+				"          hashkey as long",
+				"     ),",
+				"     format: 'table',",
+				"     store: 'sqlserver',",
+				"     schemaName: 'dbo',",
+				"     tableName: 'customers',",
+				"     insertable: false,",
+				"     updateable: true,",
+				"     deletable: false,",
+				"     upsertable: false,",
+				"     keys:['customer_id'],",
+				"     stagingSchemaName: '',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          customer_id = src_Customer_id,",
+				"          first_name = src_First_name,",
+				"          last_name = src_Last_name,",
+				"          address = src_Address,",
+				"          city = src_City,",
+				"          state = src_State,",
+				"          zip = src_Zip,",
+				"          updatedby = src_updatedby,",
+				"          updatedate = src_updateddate,",
+				"          hashkey = src_hashkey",
+				"     )) ~> sink2"
+			]
+		}
+	}
+}

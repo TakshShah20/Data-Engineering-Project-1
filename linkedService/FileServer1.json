@@ -1,0 +1,17 @@
+{
+	"name": "FileServer1",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "FileServer",
+		"typeProperties": {
+			"host": "E:\\Canada\\NCPL\\Projects\\Bootcamp\\Project-1\\dataset",
+			"userId": "taksh",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiIzNTY3ZmQ4OC02ODI3LTQwYzUtYmVlMC03MDBjOGE5OTM0N2QiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "SelfHostedIR1",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

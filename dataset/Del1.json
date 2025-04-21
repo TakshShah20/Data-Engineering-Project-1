@@ -1,0 +1,19 @@
+{
+	"name": "Del1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "gen2_LS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "Silver Layer",
+				"fileSystem": "bootcampproject-1"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
