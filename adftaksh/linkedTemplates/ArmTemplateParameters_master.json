@@ -1,0 +1,48 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "adftaksh"
+		},
+		"FileServer1_password": {
+			"value": ""
+		},
+		"SqlDB_LS_password": {
+			"value": ""
+		},
+		"gen2LS_selfhostedIR_accountKey": {
+			"value": ""
+		},
+		"gen2_LS_accountKey": {
+			"value": ""
+		},
+		"FileServer1_properties_typeProperties_host": {
+			"value": "E:\\Canada\\NCPL\\Projects\\Bootcamp\\Project-1\\dataset"
+		},
+		"FileServer1_properties_typeProperties_userId": {
+			"value": "taksh"
+		},
+		"SqlDB_LS_properties_typeProperties_server": {
+			"value": "serverts.database.windows.net"
+		},
+		"SqlDB_LS_properties_typeProperties_database": {
+			"value": "databasetaksh"
+		},
+		"SqlDB_LS_properties_typeProperties_userName": {
+			"value": "Taksh47"
+		},
+		"gen2LS_selfhostedIR_properties_typeProperties_url": {
+			"value": "https://gen2taksh.dfs.core.windows.net/"
+		},
+		"gen2_LS_properties_typeProperties_url": {
+			"value": "https://gen2taksh.dfs.core.windows.net/"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}
