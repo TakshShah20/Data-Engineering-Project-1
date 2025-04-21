@@ -12,3 +12,5 @@ accounts.sql, customers.sql, loanpayments.sql - scdtype-1
 loans.sql, transactions.sql - scdtype-2
 
 These sql files can be run in either SSMS or Azure portal.
+
+**Test files.zip:** this is a zip folder of the test files which were used for the second run scdtype-1 and scdtype-2 process of the gold layer pipeline.
