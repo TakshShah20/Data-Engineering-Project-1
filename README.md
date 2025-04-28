@@ -5,6 +5,17 @@ The project aims to design and implement a robust data pipeline for processing c
 
 A pdf file named **Customer Account Analysis** has been uploaded to this repository which explains how this project was built.
 
+**Tools used:**
+• Local system (where dataset files will be located)
+• Azure Data Lake Gen 2 Storage 
+• Azure Data Factory
+• Azure Keyvault 
+• Azure Data Flow
+• Azure SQL Database
+• Power BI Desktop 
+• Microsoft Fabric 
+• Draw.io – for architecture diagram
+
 **Dataset used:** https://www.kaggle.com/datasets/varunkumari/ai-bank-dataset
 
 All the sql files which contain the codes of table creation for scdtype-1 and scdtype-2 logic have also been uploaded to this repository.
