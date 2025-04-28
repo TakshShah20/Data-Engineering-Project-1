@@ -5,6 +5,8 @@ The project aims to design and implement a robust data pipeline for processing c
 
 A pdf file named **Customer Account Analysis** has been uploaded to this repository which explains how this project was built.
 
+**Dataset used:** https://www.kaggle.com/datasets/varunkumari/ai-bank-dataset
+
 All the sql files which contain the codes of table creation for scdtype-1 and scdtype-2 logic have also been uploaded to this repository.
 
 accounts.sql, customers.sql, loanpayments.sql - scdtype-1
